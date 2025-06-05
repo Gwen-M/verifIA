@@ -1,9 +1,11 @@
-# iApp hello-world
+# iApp VerifIA
 
 This project is an iExec Decentralized Confidential Computing serverless
 application leveraging Trusted Execution Environment (TEE).
 
 This project was scaffolded with `iapp init`.
+
+The goal of this project is to verify the information contained in a document. You can technically use this project to verify any document, but the focus is on the document containing the information about a boat license.
 
 - [Quick start](#quick-start)
   - [Prerequisites](#prerequisites)
