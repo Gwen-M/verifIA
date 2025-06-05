@@ -1,5 +1,7 @@
 # iApp VerifIA
 
+## Frontend repo: https://github.com/Gwen-M/VerifAI-frontend.git
+
 This project is an iExec Decentralized Confidential Computing serverless
 application leveraging Trusted Execution Environment (TEE).
 
