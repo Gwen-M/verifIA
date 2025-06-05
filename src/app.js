@@ -1,6 +1,5 @@
 import fs from 'node:fs/promises';
 import Tesseract from 'tesseract.js';
-import figlet from 'figlet';
 import { IExecDataProtectorDeserializer } from '@iexec/dataprotector-deserializer';
 
 // Fonction pour parser le texte OCR du permis de conduire bateau
@@ -45,17 +44,24 @@ const parseBoatLicense = (text) => {
 
     // Chercher le prénom après "2. Prénoms"
     for (let i = 0; i < lines.length; i++) {
-      if (lines[i].includes('2. Prénoms')) {
+      if (lines[i].includes('2. Prénoms') || lines[i].includes('2. Prenoms')) {
         // Le prénom peut être sur la même ligne ou la ligne suivante
         let prenomLine = lines[i];
         if (i + 1 < lines.length) {
           prenomLine += ' ' + lines[i + 1]; // Ajouter la ligne suivante
         }
         
+        // Nettoyer la ligne des caractères parasites
+        prenomLine = prenomLine.replace(/[|]/g, ' ');
+        
         const prenomMatch = prenomLine.match(/\b([A-Z]{4,})\b/g);
         if (prenomMatch) {
-          // Prendre le dernier mot en majuscules qui n'est pas "PRÉNOMS"
-          const candidats = prenomMatch.filter(word => !word.includes('PRÉNOM') && word.length > 3);
+          // Prendre le dernier mot en majuscules qui n'est pas "PRÉNOMS" ou "PRENOMS"
+          const candidats = prenomMatch.filter(word => 
+            !word.includes('PRÉNOM') && 
+            !word.includes('PRENOMS') && 
+            word.length > 3
+          );
           if (candidats.length > 0) {
             result.prenoms = candidats[candidats.length - 1];
           }
@@ -127,8 +133,6 @@ const main = async () => {
   try {
 
     const deserializer = new IExecDataProtectorDeserializer();
-    // The protected data mock created for the purpose of this Hello World journey
-    // contains an object with a key "secretText" which is a string
     const protectedImage = await deserializer.getValue('image', Buffer);
     console.log('Found a protected data');
 
@@ -137,14 +141,12 @@ const main = async () => {
       'fra'
     )
     const text = result.data.text || result.text || '';
-    console.log("Text extracted from image: ", text);
 
     // Parser le texte pour extraire les données structurées
     const parsedData = parseBoatLicense(text);
-    console.log("Données structurées extraites:", JSON.stringify(parsedData, null, 2));
+    //console.log("Données structurées extraites:", JSON.stringify(parsedData, null, 2));
 
     // Write result to IEXEC_OUT (maintenant avec les données structurées)
-    await fs.writeFile(`${IEXEC_OUT}/result.txt`, text);
     await fs.writeFile(`${IEXEC_OUT}/parsed_data.json`, JSON.stringify(parsedData, null, 2));
 
     // Build the "computed.json" object
